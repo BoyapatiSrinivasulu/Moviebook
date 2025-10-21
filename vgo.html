@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BookMyShow - Bootstrap 5 Template (Demo)</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Small custom styles to mimic a ticketing layout */
+        body {
+            background: #f5f7fb;
+        }
+
+        .movie-card {
+            transition: transform .15s ease;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .poster {
+            height: 260px;
+            object-fit: cover;
+            border-radius: .5rem;
+        }
+
+        .showtime {
+            cursor: pointer;
+        }
+
+        .seat {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px;
+            cursor: pointer;
+        }
+
+        .seat.available {
+            background: #e9f6ff;
+            border: 1px solid #bfe8ff;
+        }
+
+        .seat.selected {
+            background: #0d6efd;
+            color: white;
+        }
+
+        .seat.sold {
+            background: #f8d7da;
+            color: #842029;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .screen {
+            background: linear-gradient(90deg, #e9f8ef, #e6f7ff);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .legend .seat {
+            margin-right: 8px;
+        }
+
+        .modal-lg {
+            max-width: 900px;
+        }
+
+        @media (max-width: 576px) {
+            .poster {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-film"></i> MovieBook</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMain">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#">Movies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Cinemas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Offers</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Profile</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-4">
+        <div class="row g-4">
+            <!-- Left: Movies list -->
+            <section class="col-lg-8">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="mb-0">Now Showing</h3>
+                    <div>
+                        <select id="citySelect" class="form-select form-select-sm">
+                            <option>Hyderabad</option>
+                            <option selected>Delhi</option>
+                            <option>Mumbai</option>
+                            <option>Bengaluru</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-md-2 g-4" id="moviesList">
+                    <!-- Movie card (template in JS will populate more) -->
+                    <div class="col">
+                        <div class="card movie-card shadow-sm h-100">
+                            <div class="row g-0">
+                                <div class="col-5">
+                                    <img src="https://cdn.district.in/movies-assets/images/cinema/K-Ramp-posgter-619b5490-616b-11f0-955e-b3a7ddd74d55.jpg"
+                                        class="poster w-100" alt="Poster">
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body d-flex flex-column h-100">
+                                        <h5 class="card-title mb-1">K- Ramp</h5>
+                                        <p class="text-muted small mb-2">Action • 2h 13m • U/A</p>
+                                        <p class="card-text small text-truncate" style="max-width:100%">A thrilling
+                                            journey across continents with breathtaking stunts and emotional beats. Join
+                                            the hero as they fight time.</p>
+
+                                        <div class="mt-auto">
+                                            <div class="d-flex flex-wrap gap-2 mb-2" data-showtimes>
+                                                <!-- showtime buttons -->
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="1" data-time="10:00 AM">10:00 AM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="1" data-time="1:00 PM">1:00 PM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="1" data-time="4:30 PM">4:30 PM</button>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#movieModal" data-movie-id="1">View Details</button>
+                                                <button class="btn btn-outline-secondary btn-sm"
+                                                    onclick="scrollToBooking()">Book Now</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- another movie card -->
+                    <div class="col">
+                        <div class="card movie-card shadow-sm h-100">
+                            <div class="row g-0">
+                                <div class="col-5">
+                                    <img src="https://cdn.district.in/movies-assets/images/cinema/poster_0001_Telusu_Poster-cf1a3080-4065-11f0-b426-a50671acfc24.jpg"
+                                        class="poster w-100" alt="Poster">
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body d-flex flex-column h-100">
+                                        <h5 class="card-title mb-1">Telusu Kada</h5>
+                                        <p class="text-muted small mb-2">Romance • 2h 12m • U</p>
+                                        <p class="card-text small text-truncate">A sweet love story set against the
+                                            backdrop of Paris. Beautiful music and tender moments throughout.</p>
+                                        <div class="mt-auto">
+                                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="2" data-time="11:30 AM">11:30 AM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="2" data-time="2:30 PM">2:30 PM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="2" data-time="6:00 PM">6:00 PM</button>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#movieModal" data-movie-id="2">View Details</button>
+                                                <button class="btn btn-outline-secondary btn-sm"
+                                                    onclick="scrollToBooking()">Book Now</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row row-cols-1 row-cols-md-2 g-4" id="moviesList">
+                    <!-- Movie card (template in JS will populate more) -->
+                    <div class="col">
+                        <div class="card movie-card shadow-sm h-100">
+                            <div class="row g-0">
+                                <div class="col-5">
+                                    <img src="https://m.media-amazon.com/images/M/MV5BZWFiMzEzZTQtZjFiZC00YjhjLTk3Y2QtYzA2MjE4MmRiNzdmXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg"
+                                        class="poster w-100" alt="Poster">
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body d-flex flex-column h-100">
+                                        <h5 class="card-title mb-1">DUDE</h5>
+                                        <p class="text-muted small mb-2">Action • 2h 13m • U/A</p>
+                                        <p class="card-text small text-truncate" style="max-width:100%">A thrilling
+                                            journey across continents with breathtaking stunts and emotional beats. Join
+                                            the hero as they fight time.</p>
+
+                                        <div class="mt-auto">
+                                            <div class="d-flex flex-wrap gap-2 mb-2" data-showtimes>
+                                                <!-- showtime buttons -->
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="1" data-time="10:00 AM">10:00 AM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="1" data-time="1:00 PM">1:00 PM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="1" data-time="4:30 PM">4:30 PM</button>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#movieModal" data-movie-id="1">View Details</button>
+                                                <button class="btn btn-outline-secondary btn-sm"
+                                                    onclick="scrollToBooking()">Book Now</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- another movie card -->
+                    <div class="col">
+                        <div class="card movie-card shadow-sm h-100">
+                            <div class="row g-0">
+                                <div class="col-5">
+                                    <img src="https://m.media-amazon.com/images/M/MV5BMmI0MmU4ZTktMWM3OS00OGYzLTkzOTktZjJiOTc1NzU4YjI5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg"
+                                        class="poster w-100" alt="Poster">
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body d-flex flex-column h-100">
+                                        <h5 class="card-title mb-1">Mithra Mandali</h5>
+                                        <p class="text-muted small mb-2">Comdey • 2h 12m • U</p>
+                                        <p class="card-text small text-truncate">A sweet love story set against the
+                                            backdrop of Paris. Beautiful music and tender moments throughout.</p>
+                                        <div class="mt-auto">
+                                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="2" data-time="11:30 AM">11:30 AM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="2" data-time="2:30 PM">2:30 PM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="2" data-time="6:00 PM">6:00 PM</button>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#movieModal" data-movie-id="2">View Details</button>
+                                                <button class="btn btn-outline-secondary btn-sm"
+                                                    onclick="scrollToBooking()">Book Now</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row row-cols-1 row-cols-md-2 g-4" id="moviesList">
+                    <!-- Movie card (template in JS will populate more) -->
+                    <div class="col">
+                        <div class="card movie-card shadow-sm h-100">
+                            <div class="row g-0">
+                                <div class="col-5">
+                                    <img src="https://i.pinimg.com/736x/9f/bf/10/9fbf1079abd46477ea1517b8cf0ac9eb.jpg"
+                                        class="poster w-100" alt="Poster">
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body d-flex flex-column h-100">
+                                        <h5 class="card-title mb-1">Mirai</h5>
+                                        <p class="text-muted small mb-2">Action • 2h 13m • U/A</p>
+                                        <p class="card-text small text-truncate" style="max-width:100%">A thrilling
+                                            journey across continents with breathtaking stunts and emotional beats. Join
+                                            the hero as they fight time.</p>
+
+                                        <div class="mt-auto">
+                                            <div class="d-flex flex-wrap gap-2 mb-2" data-showtimes>
+                                                <!-- showtime buttons -->
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="1" data-time="10:00 AM">10:00 AM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="1" data-time="1:00 PM">1:00 PM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="1" data-time="4:30 PM">4:30 PM</button>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#movieModal" data-movie-id="1">View Details</button>
+                                                <button class="btn btn-outline-secondary btn-sm"
+                                                    onclick="scrollToBooking()">Book Now</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- another movie card -->
+                    <div class="col">
+                        <div class="card movie-card shadow-sm h-100">
+                            <div class="row g-0">
+                                <div class="col-5">
+                                    <img src="https://m.media-amazon.com/images/M/MV5BY2YwNGM0Y2YtOTQ4Zi00ODRkLTkxODktZTQwZTVmYzUyZjE5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg"
+                                        class="poster w-100" alt="Poster">
+                                </div>
+                                <div class="col-7">
+                                    <div class="card-body d-flex flex-column h-100">
+                                        <h5 class="card-title mb-1">Ari</h5>
+                                        <p class="text-muted small mb-2">Romance • 2h 12m • U</p>
+                                        <p class="card-text small text-truncate">A sweet love story set against the
+                                            backdrop of Paris. Beautiful music and tender moments throughout.</p>
+                                        <div class="mt-auto">
+                                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="2" data-time="11:30 AM">11:30 AM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="2" data-time="2:30 PM">2:30 PM</button>
+                                                <button class="btn btn-outline-primary btn-sm showtime"
+                                                    data-movie-id="2" data-time="6:00 PM">6:00 PM</button>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#movieModal" data-movie-id="2">View Details</button>
+                                                <button class="btn btn-outline-secondary btn-sm"
+                                                    onclick="scrollToBooking()">Book Now</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Right: Booking pane -->
+            <aside class="col-lg-4">
+                <div class="card shadow-sm sticky-top" style="top:1rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Booking Summary</h5>
+                        <p class="text-muted small mb-2" id="selectedMovieText">No movie selected</p>
+                        <div class="mb-2">
+                            <label class="form-label small">Showtime</label>
+                            <input id="selectedTime" class="form-control form-control-sm" readonly
+                                placeholder="Choose a showtime">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Seats</label>
+                            <div id="selectedSeats" class="border rounded p-2 small text-muted">0 seats selected</div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="small text-muted">Price</div>
+                            <div id="totalPrice" class="fw-bold">₹0</div>
+                        </div>
+                        <button id="proceedBtn" class="btn btn-success w-100" data-bs-toggle="modal"
+                            data-bs-target="#checkoutModal" disabled>Proceed to Pay</button>
+
+                        <hr>
+                        <div class="legend d-flex align-items-center gap-3 small">
+                            <div class="d-flex align-items-center">
+                                <div class="seat available"></div> Available
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="seat selected"></div> Selected
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="seat sold"></div> Sold
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seat selection preview card -->
+                <div class="card mt-3 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">Select Seats</h6>
+                        <div class="screen my-3">SCREEN</div>
+                        <div id="seatGrid" class="d-flex flex-column align-items-center">
+                            <!-- Rows inserted by JS -->
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Movie Details Modal -->
+    <div class="modal fade" id="movieModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="movieModalLabel">Movie Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img id="modalPoster" src="" alt="poster" class="img-fluid rounded">
+                        </div>
+                        <div class="col-md-8">
+                            <p class="mb-1"><strong>Genre:</strong> <span id="modalGenre"></span></p>
+                            <p class="mb-1"><strong>Duration:</strong> <span id="modalDuration"></span></p>
+                            <p class="mb-1"><strong>Certificate:</strong> <span id="modalCert"></span></p>
+                            <p class="mt-3" id="modalSynopsis"></p>
+                            <div class="mt-3">
+                                <small class="text-muted">Select showtimes from the page to start booking.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-primary" id="modalBookBtn" data-bs-dismiss="modal">Book This Movie</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal fade" id="checkoutModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Checkout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong id="checkoutMovie">Movie</strong> • <span id="checkoutTime"></span></p>
+                    <p>Seats: <span id="checkoutSeats"></span></p>
+                    <p class="fw-bold">Amount: <span id="checkoutAmount"></span></p>
+
+                    <hr>
+                    <form id="checkoutForm">
+                        <div class="mb-2">
+                            <label class="form-label">Name</label>
+                            <input class="form-control" required id="custName">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Email</label>
+                            <input class="form-control" type="email" required id="custEmail">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Phone</label>
+                            <input class="form-control" required id="custPhone">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-success" id="confirmBooking">Pay & Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast for confirmation -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div id="bookingToast" class="toast align-items-center text-bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">Booking confirmed! Check your email for tickets.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Demo data for movies
+        const movies = {
+            1: { id: 1, title: 'The Great Adventure', poster: 'https://images.unsplash.com/photo-1542204632-1b1f5b3e0e4b?q=80&w=900&auto=format&fit=crop&ixlib=rb-4.0.3&s=7f8c8a9d5f7e4a8d', genre: 'Action', duration: '2h 13m', cert: 'U/A', synopsis: 'A thrilling journey across continents with breathtaking stunts and emotional beats.' },
+            2: { id: 2, title: 'Romance in Paris', poster: 'https://images.unsplash.com/photo-1502139214987-6f96c3b0b6a3?q=80&w=900&auto=format&fit=crop&ixlib=rb-4.0.3&s=2bd6b7c2e7b3f8a1', genre: 'Romance', duration: '1h 50m', cert: 'U', synopsis: 'A sweet love story set against the backdrop of Paris. Beautiful music and tender moments.' }
+        };
+
+        // Seat plan: rows A-F, 8 seats each
+        const seatRows = ['A', 'B', 'C', 'D', 'E'];
+        const seatsPerRow = 8;
+        // Price per seat
+        const seatPrice = 220;
+        // Example sold seats (by showtime/movie, for demo all same)
+        const soldSeats = { '1|10:00 AM': ['A3', 'A4', 'C6'], '1|1:00 PM': ['B1', 'D8'], '2|6:00 PM': ['E2', 'E3'] };
+
+        // Current selection state
+        let state = {
+            movieId: null,
+            time: null,
+            selectedSeats: []
+        };
+
+        // Build seat grid
+        function buildSeatGrid() {
+            const container = document.getElementById('seatGrid');
+            container.innerHTML = '';
+            seatRows.forEach(row => {
+                const rowEl = document.createElement('div');
+                rowEl.className = 'd-flex justify-content-center align-items-center';
+                for (let i = 1; i <= seatsPerRow; i++) {
+                    const code = row + i;
+                    const seat = document.createElement('div');
+                    seat.className = 'seat available';
+                    seat.dataset.code = code;
+                    seat.innerText = i;
+                    seat.title = code;
+                    seat.addEventListener('click', onSeatClick);
+                    rowEl.appendChild(seat);
+                }
+                container.appendChild(rowEl);
+            });
+        }
+
+        function onSeatClick(e) {
+            const el = e.currentTarget;
+            if (el.classList.contains('sold')) return;
+            const code = el.dataset.code;
+            if (el.classList.contains('selected')) {
+                el.classList.remove('selected');
+                state.selectedSeats = state.selectedSeats.filter(s => s !== code);
+            } else {
+                el.classList.add('selected');
+                state.selectedSeats.push(code);
+            }
+            updateSummary();
+        }
+
+        // Update booking summary UI
+        function updateSummary() {
+            const movieText = state.movieId ? movies[state.movieId].title : 'No movie selected';
+            document.getElementById('selectedMovieText').innerText = movieText;
+            document.getElementById('selectedTime').value = state.time || '';
+            const seatsEl = document.getElementById('selectedSeats');
+            if (state.selectedSeats.length === 0) seatsEl.innerText = '0 seats selected';
+            else seatsEl.innerText = state.selectedSeats.join(', ');
+            const total = state.selectedSeats.length * seatPrice;
+            document.getElementById('totalPrice').innerText = '₹' + total;
+            document.getElementById('proceedBtn').disabled = !(state.movieId && state.time && state.selectedSeats.length > 0);
+        }
+
+        // Mark sold seats based on selection
+        function applySoldSeats() {
+            // Clear previous sold
+            document.querySelectorAll('#seatGrid .seat').forEach(s => {
+                s.classList.remove('sold');
+                s.classList.add('available');
+                s.classList.remove('selected');
+            });
+            state.selectedSeats = [];
+            if (!state.movieId || !state.time) return;
+            const key = state.movieId + '|' + state.time;
+            const sold = soldSeats[key] || [];
+            sold.forEach(code => {
+                const el = document.querySelector('#seatGrid .seat[data-code="' + code + '"]');
+                if (el) { el.classList.remove('available'); el.classList.add('sold'); }
+            });
+            updateSummary();
+        }
+
+        // Show movie details in modal
+        const movieModal = document.getElementById('movieModal');
+        movieModal.addEventListener('show.bs.modal', (e) => {
+            const button = e.relatedTarget;
+            const id = button.getAttribute('data-movie-id');
+            const m = movies[id];
+            document.getElementById('movieModalLabel').innerText = m.title;
+            document.getElementById('modalPoster').src = m.poster;
+            document.getElementById('modalGenre').innerText = m.genre;
+            document.getElementById('modalDuration').innerText = m.duration;
+            document.getElementById('modalCert').innerText = m.cert;
+            document.getElementById('modalSynopsis').innerText = m.synopsis;
+            document.getElementById('modalBookBtn').dataset.movieId = id;
+        });
+
+        // Clicking "Book This Movie" in modal preselects movie
+        document.getElementById('modalBookBtn').addEventListener('click', (e) => {
+            const id = e.currentTarget.dataset.movieId;
+            state.movieId = parseInt(id);
+            buildSeatGrid();
+            applySoldSeats();
+            updateSummary();
+            scrollToBooking();
+        });
+
+        // Showtimes clickable
+        document.querySelectorAll('.showtime').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(e.currentTarget.dataset.movieId);
+                const time = e.currentTarget.dataset.time;
+                state.movieId = id;
+                state.time = time;
+                buildSeatGrid();
+                applySoldSeats();
+                updateSummary();
+                // visually mark selected showtime
+                document.querySelectorAll('.showtime').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+            });
+        });
+
+        // Proceed to checkout - populate modal
+        document.getElementById('proceedBtn').addEventListener('click', () => {
+            document.getElementById('checkoutMovie').innerText = movies[state.movieId].title;
+            document.getElementById('checkoutTime').innerText = state.time;
+            document.getElementById('checkoutSeats').innerText = state.selectedSeats.join(', ');
+            document.getElementById('checkoutAmount').innerText = '₹' + (state.selectedSeats.length * seatPrice);
+        });
+
+        // Confirm booking
+        document.getElementById('confirmBooking').addEventListener('click', () => {
+            // simple demo: mark seats as sold in demo state
+            const key = state.movieId + '|' + state.time;
+            soldSeats[key] = (soldSeats[key] || []).concat(state.selectedSeats);
+            // reset selection
+            state.selectedSeats = [];
+            state.time = null;
+            state.movieId = null;
+            buildSeatGrid();
+            applySoldSeats();
+            updateSummary();
+            var toastEl = document.getElementById('bookingToast');
+            var bsToast = new bootstrap.Toast(toastEl);
+            bsToast.show();
+            // close checkout modal
+            var checkoutModalEl = document.getElementById('checkoutModal');
+            var bsModal = bootstrap.Modal.getInstance(checkoutModalEl);
+            if (bsModal) bsModal.hide();
+        });
+
+        function scrollToBooking() {
+            const el = document.querySelector('aside');
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // initial build
+        buildSeatGrid();
+        updateSummary();
+    </script>
+</body>
+
+</html>
