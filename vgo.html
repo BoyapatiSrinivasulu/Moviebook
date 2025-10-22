@@ -485,175 +485,192 @@
     </div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Demo data for movies
-        const movies = {
-            1: { id: 1, title: 'The Great Adventure', poster: 'https://images.unsplash.com/photo-1542204632-1b1f5b3e0e4b?q=80&w=900&auto=format&fit=crop&ixlib=rb-4.0.3&s=7f8c8a9d5f7e4a8d', genre: 'Action', duration: '2h 13m', cert: 'U/A', synopsis: 'A thrilling journey across continents with breathtaking stunts and emotional beats.' },
-            2: { id: 2, title: 'Romance in Paris', poster: 'https://images.unsplash.com/photo-1502139214987-6f96c3b0b6a3?q=80&w=900&auto=format&fit=crop&ixlib=rb-4.0.3&s=2bd6b7c2e7b3f8a1', genre: 'Romance', duration: '1h 50m', cert: 'U', synopsis: 'A sweet love story set against the backdrop of Paris. Beautiful music and tender moments.' }
-        };
-
-        // Seat plan: rows A-F, 8 seats each
-        const seatRows = ['A', 'B', 'C', 'D', 'E'];
-        const seatsPerRow = 8;
-        // Price per seat
-        const seatPrice = 220;
-        // Example sold seats (by showtime/movie, for demo all same)
-        const soldSeats = { '1|10:00 AM': ['A3', 'A4', 'C6'], '1|1:00 PM': ['B1', 'D8'], '2|6:00 PM': ['E2', 'E3'] };
-
-        // Current selection state
-        let state = {
-            movieId: null,
-            time: null,
-            selectedSeats: []
-        };
-
-        // Build seat grid
-        function buildSeatGrid() {
-            const container = document.getElementById('seatGrid');
-            container.innerHTML = '';
-            seatRows.forEach(row => {
-                const rowEl = document.createElement('div');
-                rowEl.className = 'd-flex justify-content-center align-items-center';
-                for (let i = 1; i <= seatsPerRow; i++) {
-                    const code = row + i;
-                    const seat = document.createElement('div');
-                    seat.className = 'seat available';
-                    seat.dataset.code = code;
-                    seat.innerText = i;
-                    seat.title = code;
-                    seat.addEventListener('click', onSeatClick);
-                    rowEl.appendChild(seat);
-                }
-                container.appendChild(rowEl);
-            });
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const movies = {
+        1: {
+            id: 1,
+            title: 'K-Ramp',
+            poster: 'https://cdn.district.in/movies-assets/images/cinema/K-Ramp-posgter-619b5490-616b-11f0-955e-b3a7ddd74d55.jpg',
+            genre: 'Action',
+            duration: '2h 13m',
+            cert: 'U/A',
+            synopsis: 'A thrilling journey across continents with breathtaking stunts and emotional beats.'
+        },
+        2: {
+            id: 2,
+            title: 'Telusu Kada',
+            poster: 'https://cdn.district.in/movies-assets/images/cinema/poster_0001_Telusu_Poster-cf1a3080-4065-11f0-b426-a50671acfc24.jpg',
+            genre: 'Romance',
+            duration: '1h 50m',
+            cert: 'U',
+            synopsis: 'A romantic drama that explores love, family, and self-discovery.'
         }
+    };
 
-        function onSeatClick(e) {
-            const el = e.currentTarget;
-            if (el.classList.contains('sold')) return;
-            const code = el.dataset.code;
-            if (el.classList.contains('selected')) {
-                el.classList.remove('selected');
-                state.selectedSeats = state.selectedSeats.filter(s => s !== code);
-            } else {
-                el.classList.add('selected');
-                state.selectedSeats.push(code);
+    const seatRows = ['A', 'B', 'C', 'D', 'E'];
+    const seatsPerRow = 8;
+    const seatPrice = 220;
+
+    const soldSeats = {
+        '1|10:00 AM': ['A3', 'A4', 'C6'],
+        '1|1:00 PM': ['B1', 'D8'],
+        '2|6:00 PM': ['E2', 'E3']
+    };
+
+    let state = {
+        movieId: null,
+        time: null,
+        selectedSeats: []
+    };
+
+    function buildSeatGrid() {
+        const container = document.getElementById('seatGrid');
+        container.innerHTML = '';
+        seatRows.forEach(row => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'd-flex justify-content-center align-items-center';
+            for (let i = 1; i <= seatsPerRow; i++) {
+                const code = row + i;
+                const seat = document.createElement('div');
+                seat.className = 'seat available';
+                seat.dataset.code = code;
+                seat.innerText = i;
+                seat.title = code;
+                seat.addEventListener('click', onSeatClick);
+                rowEl.appendChild(seat);
             }
-            updateSummary();
-        }
-
-        // Update booking summary UI
-        function updateSummary() {
-            const movieText = state.movieId ? movies[state.movieId].title : 'No movie selected';
-            document.getElementById('selectedMovieText').innerText = movieText;
-            document.getElementById('selectedTime').value = state.time || '';
-            const seatsEl = document.getElementById('selectedSeats');
-            if (state.selectedSeats.length === 0) seatsEl.innerText = '0 seats selected';
-            else seatsEl.innerText = state.selectedSeats.join(', ');
-            const total = state.selectedSeats.length * seatPrice;
-            document.getElementById('totalPrice').innerText = '₹' + total;
-            document.getElementById('proceedBtn').disabled = !(state.movieId && state.time && state.selectedSeats.length > 0);
-        }
-
-        // Mark sold seats based on selection
-        function applySoldSeats() {
-            // Clear previous sold
-            document.querySelectorAll('#seatGrid .seat').forEach(s => {
-                s.classList.remove('sold');
-                s.classList.add('available');
-                s.classList.remove('selected');
-            });
-            state.selectedSeats = [];
-            if (!state.movieId || !state.time) return;
-            const key = state.movieId + '|' + state.time;
-            const sold = soldSeats[key] || [];
-            sold.forEach(code => {
-                const el = document.querySelector('#seatGrid .seat[data-code="' + code + '"]');
-                if (el) { el.classList.remove('available'); el.classList.add('sold'); }
-            });
-            updateSummary();
-        }
-
-        // Show movie details in modal
-        const movieModal = document.getElementById('movieModal');
-        movieModal.addEventListener('show.bs.modal', (e) => {
-            const button = e.relatedTarget;
-            const id = button.getAttribute('data-movie-id');
-            const m = movies[id];
-            document.getElementById('movieModalLabel').innerText = m.title;
-            document.getElementById('modalPoster').src = m.poster;
-            document.getElementById('modalGenre').innerText = m.genre;
-            document.getElementById('modalDuration').innerText = m.duration;
-            document.getElementById('modalCert').innerText = m.cert;
-            document.getElementById('modalSynopsis').innerText = m.synopsis;
-            document.getElementById('modalBookBtn').dataset.movieId = id;
+            container.appendChild(rowEl);
         });
+    }
 
-        // Clicking "Book This Movie" in modal preselects movie
-        document.getElementById('modalBookBtn').addEventListener('click', (e) => {
-            const id = e.currentTarget.dataset.movieId;
-            state.movieId = parseInt(id);
+    function onSeatClick(e) {
+        const el = e.currentTarget;
+        if (el.classList.contains('sold')) return;
+        const code = el.dataset.code;
+        if (el.classList.contains('selected')) {
+            el.classList.remove('selected');
+            state.selectedSeats = state.selectedSeats.filter(s => s !== code);
+        } else {
+            el.classList.add('selected');
+            state.selectedSeats.push(code);
+        }
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const movieText = state.movieId ? movies[state.movieId].title : 'No movie selected';
+        document.getElementById('selectedMovieText').innerText = movieText;
+        document.getElementById('selectedTime').value = state.time || '';
+        const seatsEl = document.getElementById('selectedSeats');
+        if (state.selectedSeats.length === 0)
+            seatsEl.innerText = '0 seats selected';
+        else
+            seatsEl.innerText = state.selectedSeats.join(', ');
+        const total = state.selectedSeats.length * seatPrice;
+        document.getElementById('totalPrice').innerText = '₹' + total;
+        document.getElementById('proceedBtn').disabled = !(state.movieId && state.time && state.selectedSeats.length > 0);
+    }
+
+    function applySoldSeats() {
+        document.querySelectorAll('#seatGrid .seat').forEach(s => {
+            s.classList.remove('sold', 'selected');
+            s.classList.add('available');
+        });
+        state.selectedSeats = [];
+        if (!state.movieId || !state.time) return;
+        const key = `${state.movieId}|${state.time}`;
+        const sold = soldSeats[key] || [];
+        sold.forEach(code => {
+            const el = document.querySelector(`#seatGrid .seat[data-code="${code}"]`);
+            if (el) el.classList.replace('available', 'sold');
+        });
+        updateSummary();
+    }
+
+    const movieModal = document.getElementById('movieModal');
+    movieModal.addEventListener('show.bs.modal', e => {
+        const button = e.relatedTarget;
+        const id = button.getAttribute('data-movie-id');
+        const m = movies[id];
+        document.getElementById('movieModalLabel').innerText = m.title;
+        document.getElementById('modalPoster').src = m.poster;
+        document.getElementById('modalGenre').innerText = m.genre;
+        document.getElementById('modalDuration').innerText = m.duration;
+        document.getElementById('modalCert').innerText = m.cert;
+        document.getElementById('modalSynopsis').innerText = m.synopsis;
+        document.getElementById('modalBookBtn').dataset.movieId = id;
+    });
+
+    document.getElementById('modalBookBtn').addEventListener('click', e => {
+        const id = e.currentTarget.dataset.movieId;
+        state.movieId = parseInt(id);
+        state.time = null;
+        buildSeatGrid();
+        applySoldSeats();
+        updateSummary();
+        scrollToBooking();
+    });
+
+    document.querySelectorAll('.showtime').forEach(btn => {
+        btn.addEventListener('click', e => {
+            const id = parseInt(e.currentTarget.dataset.movieId);
+            const time = e.currentTarget.dataset.time;
+            state.movieId = id;
+            state.time = time;
             buildSeatGrid();
             applySoldSeats();
             updateSummary();
+            document.querySelectorAll('.showtime').forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
             scrollToBooking();
         });
+    });
 
-        // Showtimes clickable
-        document.querySelectorAll('.showtime').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = parseInt(e.currentTarget.dataset.movieId);
-                const time = e.currentTarget.dataset.time;
-                state.movieId = id;
-                state.time = time;
+    document.querySelectorAll('.btn-outline-secondary').forEach(btn => {
+        btn.addEventListener('click', e => {
+            const card = e.currentTarget.closest('.movie-card');
+            const movieTitle = card.querySelector('.card-title').innerText.trim();
+            const selectedMovie = Object.values(movies).find(m => m.title === movieTitle);
+            if (selectedMovie) {
+                state.movieId = selectedMovie.id;
                 buildSeatGrid();
                 applySoldSeats();
                 updateSummary();
-                // visually mark selected showtime
-                document.querySelectorAll('.showtime').forEach(b => b.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-            });
+                scrollToBooking();
+            }
         });
+    });
 
-        // Proceed to checkout - populate modal
-        document.getElementById('proceedBtn').addEventListener('click', () => {
-            document.getElementById('checkoutMovie').innerText = movies[state.movieId].title;
-            document.getElementById('checkoutTime').innerText = state.time;
-            document.getElementById('checkoutSeats').innerText = state.selectedSeats.join(', ');
-            document.getElementById('checkoutAmount').innerText = '₹' + (state.selectedSeats.length * seatPrice);
-        });
+    document.getElementById('proceedBtn').addEventListener('click', () => {
+        document.getElementById('checkoutMovie').innerText = movies[state.movieId].title;
+        document.getElementById('checkoutTime').innerText = state.time;
+        document.getElementById('checkoutSeats').innerText = state.selectedSeats.join(', ');
+        document.getElementById('checkoutAmount').innerText = '₹' + (state.selectedSeats.length * seatPrice);
+    });
 
-        // Confirm booking
-        document.getElementById('confirmBooking').addEventListener('click', () => {
-            // simple demo: mark seats as sold in demo state
-            const key = state.movieId + '|' + state.time;
-            soldSeats[key] = (soldSeats[key] || []).concat(state.selectedSeats);
-            // reset selection
-            state.selectedSeats = [];
-            state.time = null;
-            state.movieId = null;
-            buildSeatGrid();
-            applySoldSeats();
-            updateSummary();
-            var toastEl = document.getElementById('bookingToast');
-            var bsToast = new bootstrap.Toast(toastEl);
-            bsToast.show();
-            // close checkout modal
-            var checkoutModalEl = document.getElementById('checkoutModal');
-            var bsModal = bootstrap.Modal.getInstance(checkoutModalEl);
-            if (bsModal) bsModal.hide();
-        });
-
-        function scrollToBooking() {
-            const el = document.querySelector('aside');
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // initial build
+    document.getElementById('confirmBooking').addEventListener('click', () => {
+        const key = `${state.movieId}|${state.time}`;
+        soldSeats[key] = (soldSeats[key] || []).concat(state.selectedSeats);
+        state.selectedSeats = [];
+        state.time = null;
+        state.movieId = null;
         buildSeatGrid();
+        applySoldSeats();
         updateSummary();
-    </script>
-</body>
+        const toastEl = document.getElementById('bookingToast');
+        new bootstrap.Toast(toastEl).show();
+        const checkoutModalEl = document.getElementById('checkoutModal');
+        const bsModal = bootstrap.Modal.getInstance(checkoutModalEl);
+        if (bsModal) bsModal.hide();
+    });
 
+    function scrollToBooking() {
+        document.querySelector('aside').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    buildSeatGrid();
+    updateSummary();
+</script>
+</body>
 </html>
